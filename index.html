@@ -1,0 +1,47 @@
+
+<!DOCTYPE html>
+<html lang='en' ng-app='testApp'>
+  <head>
+    <meta charset='utf-8'>
+    <meta content='IE=edge' http-equiv='X-UA-Compatible'>
+    <meta content='width=device-width, initial-scale=1.0' name='viewport'>
+    <link href="bower_components/bootstrap/dist/css/bootstrap.css" media="all" rel="stylesheet" />
+    <link rel="stylesheet" href="bower_components/bootstrap-tokenfield/dist/css/bootstrap-tokenfield.css" />
+    <link rel="stylesheet" href="bower_components/jquery-ui/themes/ui-lightness/jquery-ui.css" />
+
+    <script src="bower_components/jquery/dist/jquery.js"></script>
+    <script src="bower_components/jquery-ui/jquery-ui.min.js"></script>
+    <script src="bower_components/angular/angular.js"></script>
+
+    <!--  !-->
+    <script src="bower_components/objectpath/lib/ObjectPath.js"></script>
+    <script src="bower_components/tv4/tv4.js"></script>
+    <script src="bower_components/angular-schema-form/dist/schema-form.js"></script>
+    <script src="bower_components/angular-schema-form-bootstrap/bootstrap-decorator.js"></script>
+    <script src="bower_components/bootstrap-tokenfield/dist/bootstrap-tokenfield.js"></script>
+    <script src="bower_components/angular-bootstrap-tokenfield/angular-bootstrap-tokenfield.js"></script>
+
+    <script src="dist/angular-schema-form-tokenfield.js"></script>
+
+    <script src="app.js"></script>
+    <title>Angular schema form tokenfield example</title>
+</head>
+<body ng-controller='appController' class="container">
+<h1>Example</h1>
+
+<p>This is an example of the features of <a href="https://github.com/indodutch/angular-schema-form-tokenfield">Angular
+    schema form tokenfield</a></p>
+
+<p>Please <a href="https://github.com/indodutch/angular-schema-form-tokenfield/issues">report any issues or bugs
+    you may find.</a></p>
+
+<h2>The Form:</h2>
+<form name="tokenfieldForm" sf-schema="schema" sf-form="form" sf-model="model" ng-submit="submitted(tokenfieldForm)"></form>
+
+<h3>Known issues:</h3>
+<ul>
+    <li>min-length option calculates min-length+1 (<a href="https://github.com/sliptree/bootstrap-tokenfield/issues/289">github issue</a>)
+</ul>
+
+</body>
+</html>

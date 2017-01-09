@@ -1,0 +1,37 @@
+{
+  "name": "angular-schema-form-tokenfield",
+  "homepage": "https://github.com/indodutch/angular-schema-form-tokenfield",
+  "authors": [
+    "Berend Weel <b.weel@esciencecenter.nl>"
+  ],
+  "description": "",
+  "main": [
+    "dist/angular-schema-form-tokenfield.js",
+    "dist/angular-schema-form-tokenfield.min.js"
+  ],
+  "keywords": [
+    "angular",
+    "schemaform",
+    "tokenfield"
+  ],
+  "license": "Apache-2.0",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "angular-bootstrap-tokenfield": "^0.2.0",
+    "angular-schema-form": "^0.8.13",
+    "angular-schema-form-bootstrap": "^0.2.0",
+    "bootstrap-tokenfield": "^0.12.1",
+    "jquery": "^3.1.1",
+    "jquery-ui": "^1.12.1"
+  },
+  "resolutions": {
+    "jquery": "^3.1.1",
+    "bootstrap": "^3.3.7"
+  }
+}
