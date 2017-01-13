@@ -7,45 +7,49 @@
  * @type {angular.Module}
  */
 
-var testApp = angular.module("testApp", ["schemaForm", "angularTokenfield"]);
-
-testApp.controller("appController", ["$scope", "$http", function ($scope, $http) {
-    $scope.schema = {
-        type: "object",
-        title: "Tokenfield",
-        properties: {
-            tokenfield1: {
-                title: "Tokenfield",
-                type: "string",
-                format: "tokenfield"
-            },
-            minlength: {
-                title: "Minimum length: 5",
-                type: "string",
-                format: "tokenfield"
-            },
-            autocomplete: {
-                title: "With autocomplete",
-                type: "string",
-                format: "tokenfield"
+var testApp = angular.module('app', ['ngRoute', 'schemaForm', 'angularTokenfield'])
+.config(function($routeProvider) {
+    $routeProvider.
+      when('/', {controller: 'appController'});
+  });
+  
+testApp.controller('appController', ['$scope', '$http', function ($scope, $http) {
+        $scope.schema = {
+            type: "object",
+            title: "Tokenfield",
+            properties: {
+                tokenfield1: {
+                    title: "Tokenfield",
+                    type: "string",
+                    format: "tokenfield"
+                },
+                minlength: {
+                    title: "Minimum length: 5",
+                    type: "string",
+                    format: "tokenfield"
+                },
+                autocomplete: {
+                    title: "With autocomplete",
+                    type: "string",
+                    format: "tokenfield"
+                }
             }
-        }
-    };
+        };
 
-    $scope.form = [
-        "tokenfield1",
-        {
-            key: "minlength",
-            minLength: 5
-        },
-        {
-            key: "autocomplete",
-            autocomplete: {
-                source: ['red','blue','green','yellow','violet','brown','purple','black','white'],
-                delay: 100
+        $scope.form = [
+            "tokenfield1",
+            {
+                key: "minlength",
+                minLength: 5
             },
-            showAutocompleteOnFocus: true,
-            placeholder: "Autocomplete requires jquery-ui"
-        }
-    ];
-}]);
+            {
+                key: "autocomplete",
+                autocomplete: {
+                    source: ['red', 'blue', 'green', 'yellow', 'violet', 'brown', 'purple', 'black', 'white'],
+                    delay: 100
+                },
+                showAutocompleteOnFocus: true,
+                placeholder: "Autocomplete requires jquery-ui"
+            }
+        ];
+    }]);

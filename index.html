@@ -1,6 +1,6 @@
 
 <!DOCTYPE html>
-<html lang='en' ng-app='testApp'>
+<html lang='en' ng-app='app'>
   <head>
     <meta charset='utf-8'>
     <meta content='IE=edge' http-equiv='X-UA-Compatible'>
@@ -9,9 +9,13 @@
     <link rel="stylesheet" href="bower_components/bootstrap-tokenfield/dist/css/bootstrap-tokenfield.css" />
     <link rel="stylesheet" href="bower_components/jquery-ui/themes/ui-lightness/jquery-ui.css" />
 
+    <title>Angular schema form tokenfield example</title>
+</head>
+<body ng-controller='appController' class="container">
     <script src="bower_components/jquery/dist/jquery.js"></script>
     <script src="bower_components/jquery-ui/jquery-ui.min.js"></script>
     <script src="bower_components/angular/angular.js"></script>
+    <script src="bower_components/angular-route/angular-route.min.js"></script>
 
     <!--  !-->
     <script src="bower_components/objectpath/lib/ObjectPath.js"></script>
@@ -24,9 +28,6 @@
     <script src="dist/angular-schema-form-tokenfield.js"></script>
 
     <script src="app.js"></script>
-    <title>Angular schema form tokenfield example</title>
-</head>
-<body ng-controller='appController' class="container">
 <h1>Example</h1>
 
 <p>This is an example of the features of <a href="https://github.com/indodutch/angular-schema-form-tokenfield">Angular

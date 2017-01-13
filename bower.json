@@ -11,7 +11,7 @@
   ],
   "keywords": [
     "angular",
-    "schemaform",
+    "angular-schema-form-add-on",
     "tokenfield"
   ],
   "license": "Apache-2.0",
@@ -23,7 +23,7 @@
     "tests"
   ],
   "dependencies": {
-    "angular-bootstrap-tokenfield": "^0.2.0",
+    "angular-bootstrap-tokenfield": "^0.3.0",
     "angular-schema-form": "^0.8.13",
     "angular-schema-form-bootstrap": "^0.2.0",
     "bootstrap-tokenfield": "^0.12.1",
