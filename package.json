@@ -23,5 +23,12 @@
     "jshint": "^2.9.4",
     "main-bower-files": "^2.13.1",
     "wiredep": "^4.0.0"
+  },
+  "devDependencies": {
+    "express": "^4.14.0",
+    "gulp-htmlmin": "^3.0.0",
+    "gulp-jshint": "^2.0.4",
+    "jshint-stylish": "^2.2.1",
+    "serve-static": "^1.11.2"
   }
 }

@@ -11,7 +11,7 @@
 
     <title>Angular schema form tokenfield example</title>
 </head>
-<body ng-controller='appController' class="container">
+<body ng-controller='appController as vm' class="container">
     <script src="bower_components/jquery/dist/jquery.js"></script>
     <script src="bower_components/jquery-ui/jquery-ui.min.js"></script>
     <script src="bower_components/angular/angular.js"></script>
@@ -23,7 +23,6 @@
     <script src="bower_components/angular-schema-form/dist/schema-form.js"></script>
     <script src="bower_components/angular-schema-form-bootstrap/bootstrap-decorator.js"></script>
     <script src="bower_components/bootstrap-tokenfield/dist/bootstrap-tokenfield.js"></script>
-    <script src="bower_components/angular-bootstrap-tokenfield/angular-bootstrap-tokenfield.js"></script>
 
     <script src="dist/angular-schema-form-tokenfield.js"></script>
 
@@ -37,7 +36,9 @@
     you may find.</a></p>
 
 <h2>The Form:</h2>
-<form name="tokenfieldForm" sf-schema="schema" sf-form="form" sf-model="model" ng-submit="submitted(tokenfieldForm)"></form>
+<form name="tokenfieldForm" sf-schema="schema" sf-form="form" sf-model="model" ng-submit="submit(tokenfieldForm)">
+</form>
+
 
 <h3>Known issues:</h3>
 <ul>

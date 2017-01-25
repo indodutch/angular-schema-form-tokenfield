@@ -11,6 +11,7 @@ var minifycss = require('gulp-minify-css');
 var rename = require('gulp-rename');
     //for javascript:
 var jshint = require('gulp-jshint');
+var stylish = require('jshint-stylish');
 var uglify = require('gulp-uglify');
 var concat = require('gulp-concat');
     //for cleaning out dist/ directory before build:
@@ -23,7 +24,7 @@ var htmlify = require('gulp-angular-htmlify');
 var gulpFilter = require('gulp-filter');
 var useref = require('gulp-useref');
 
-var minifyHtml = require('gulp-minify-html');
+var htmlmin = require('gulp-htmlmin');
 var templateCache = require('gulp-angular-templatecache');
 
 //paths object to save file paths for ease as gulpfile gets larger
@@ -68,15 +69,16 @@ gulp.task('styles', function() {
 });
 
 //stylish output for errors
-gulp.task('lint', function() {
-  return gulp.src(paths.dev.js)
+gulp.task('lint', function(cb) {
+  gulp.src(paths.dev.js)
   .pipe(jshint()).on('error', errorHandler)
-  .pipe(jshint.reporter('jshint-stylish'))
+  .pipe(jshint.reporter(stylish))
   .pipe(jshint.reporter('fail'));
+  cb(null);
 });
 
 //build task, with other tasks as dependencies and then javascript handling in anonymous function
-gulp.task('build', ['empty-dist', 'templates', 'copy-css'], function() {
+gulp.task('build', ['empty-dist', 'lint', 'templates', 'copy-css'], function() {
     gulp.src(['./templates.js', paths.dev.js])
     .pipe(concat('angular-schema-form-tokenfield.js'))
     .pipe(gulp.dest(paths.build.js));
@@ -89,29 +91,30 @@ gulp.src(['./templates.js', paths.dev.js])
 });
 
 //task to clear out dist/ folder befor building out deployment version of app - runs before every other task in 'gulp build'
-gulp.task('empty-dist', function() {
-  return del([paths.build.main+'/**/*']);
+gulp.task('empty-dist', function(cb) {
+  del([paths.build.main+'/**/*']);
+  cb(null);
 });
 
 //copy minified CSS over to /dist
-gulp.task('copy-css', function () {
-  return gulp.src(paths.dev.css)
+gulp.task('copy-css', function (cb) {
+  gulp.src(paths.dev.css)
     .pipe(gulp.dest(paths.build.css));
+  cb(null);
 });
 
-gulp.task('templates', function() {
+gulp.task('templates', function(cb) {
   gulp.src(paths.dev.html)
       .pipe(htmlify())
-      .pipe(minifyHtml({
-        empty: true,
-        spare: true,
-        quotes: true
+      .pipe(htmlmin({
+        'collapseWhitespace': false
       }))
       .pipe(templateCache({
         module: 'schemaForm',
         root: 'directives/decorators/bootstrap/tokenfield/'
       }))
       .pipe(gulp.dest("."))
+    cb(null);
 });
 
 //error handler helper for jshint
