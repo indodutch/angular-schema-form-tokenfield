@@ -7,7 +7,7 @@
  * @type {angular.Module}
  */
 
-var testApp = angular.module('app', ['ngRoute', 'schemaForm'])
+var testApp = angular.module('app', ['ngRoute', 'ngSanitize', 'schemaForm'])
 .config(function($routeProvider) {
     $routeProvider.
       when('/', {controller: 'appController'});
@@ -33,35 +33,43 @@ testApp.controller('appController', ['$scope', '$http', function ($scope, $http)
                         maximum: 5
                     }
                 },
-                minlength: {
-                    title: "Minimum length: 5",
+                tokenfield2: {
+                    title: "Tokenfield",
                     type: "array",
                     format: "tokenfield",
                     items: {
-                        type: "string"
+                        type: 'object',
+                        properties: {
+                            age: {
+                                minimum: 3,
+                                maximum: 5
+                            }
+                        }
                     }
                 },
-                autocomplete: {
-                    title: "With autocomplete",
+                arraytest: {
+                    title: "Array",
                     type: "array",
-                    format: "tokenfield",
                     items: {
-                        type: "string"
+                        type: "number",
+                        maximum: 5
                     }
                 }
             }
         };
 
         $scope.form = [
-            "nummer",
+            // "nummer",
             {
                 key: "tokenfield1",
             },
-            {
-                description: "This is a simple field with minimum length 5",
-                key: "minlength",
-                minLength: 5
-            },
+            //"tokenfield2",
+            "arraytest",
+            // {
+            //     description: "This is a simple field with minimum length 5",
+            //     key: "minlength",
+            //     minLength: 5
+            // },
             {
                 key: "autocomplete",
                 autocomplete: {

@@ -1,41 +1,100 @@
-angular.module('schemaForm').run(['$templateCache', function($templateCache) {$templateCache.put('directives/decorators/bootstrap/tokenfield/angular-schema-form-tokenfield.html','<div class="form-group schema-form-{{form.type}} {{form.htmlClass}}" data-ng-class="{\'has-error\': form.disableErrorState !== true && hasError(), \'has-success\': form.disableSuccessState !== true && hasSuccess(), \'has-feedback\': form.feedback !== false }">\n  <label class="control-label {{form.labelHtmlClass}}" for="{{form.key.slice(-1)[0]}}" data-ng-class="{\'sr-only\': !showTitle()}">{{form.title}}</label>\n\n  <input type="{{form.type}}" step="any" sf-changed="form" placeholder="{{form.placeholder}}" class="form-control {{form.fieldHtmlClass}}" id="{{ form.key.slice(-1)[0] }}" name="{{ form.key.slice(-1)[0] }}" aria-describedby="{{ form.key.slice(-1)[0] + \'Status\' }}" sf-field-model="" angular-bootstrap-tokenfield="" schema-validate="form" tokens="form.tokens" limit="form.limit" min-length="form.minLength" min-width="form.minWidth" show-autocomplete-on-focus="form.showAutocompleteOnFocus" autocomplete="form.autocomplete" create-tokens-on-blur="form.createTokensOnBlur" delimiter="form.delimiter" beautify="form.beautify" input-type="form.schema.items.type" data-ng-if="!form.fieldAddonLeft && !form.fieldAddonRight" data-ng-show="form.key" data-ng-model="$$value$$" data-ng-disabled="form.readonly">\n\n  <span class="form-control-feedback" aria-hidden="true" data-ng-if="form.feedback !== false" data-ng-class="evalInScope(form.feedback) || {\'glyphicon\': true, \'glyphicon-ok\': hasSuccess(), \'glyphicon-remove\': hasError() }"></span>\n\n  <span id="{{form.key.slice(-1)[0] + \'Status\'}}" class="sr-only" data-ng-if="hasError() || hasSuccess()">{{ hasSuccess() ? \'(success)\' : \'(error)\' }}</span>\n\n  <div class="help-block" sf-message="form.description"></div>\n\n</div>');}]);
+angular.module('schemaForm').run(['$templateCache', function($templateCache) {$templateCache.put('directives/decorators/bootstrap/tokenfield/angular-schema-form-tokenfield.html','<div class="form-group schema-form-{{form.type}} {{form.htmlClass}}" sf-field-model="sf-new-array" sf-new-array="tokenfield.modelValue" schema-validate="form" data-ng-controller="angularBootstrapTokenfieldController" data-ng-class="{\'has-error\': form.disableErrorState !== true && hasError(), \'has-success\': form.disableSuccessState !== true && hasSuccess(), \'has-feedback\': form.feedback !== false }" data-ng-model="tokenfield.modelValue">\n  <label class="control-label {{form.labelHtmlClass}}" data-ng-class="{\'sr-only\': !showTitle()}">{{form.title}}</label>\n    <input tokens="form.tokens" limit="form.limit" min-length="form.minLength" min-width="form.minWidth" show-autocomplete-on-focus="form.showAutocompleteOnFocus" autocomplete="form.autocomplete" create-tokens-on-blur="form.createTokensOnBlur" delimiter="form.delimiter" beautify="form.beautify" input-type="form.schema.items.type" type="form.schema.items.type" angular-bootstrap-tokenfield="" data-ng-model="tokenfield.viewValue">\n\n    <div class="help-block" sf-message="form.description"></div>\n\n</div>');}]);
 (function () {
     'use strict';
     angular.module('schemaForm').config(
-        ['schemaFormProvider', 'schemaFormDecoratorsProvider', 'sfPathProvider',
-            function (schemaFormProvider, schemaFormDecoratorsProvider, sfPathProvider) {
+        ['schemaFormProvider', 'schemaFormDecoratorsProvider', 'sfPathProvider', 'sfBuilderProvider',
+            function (schemaFormProvider, schemaFormDecoratorsProvider, sfPathProvider, sfBuilderProvider) {
                 var tokenfield = function (name, schema, options) {
                     if ((schema.type === 'array') && (schema.format === 'tokenfield')) {
-                        var f = schemaFormProvider.stdFormObj(name, schema, options);
-                        f.key = options.path;
-                        f.type = 'tokenfield';
-                        // Override type to disable array validation
-                        f.schema.type = 'string';
-                        options.lookup[sfPathProvider.stringify(options.path)] = f;
-                        return f;
+                        var itemSchema = schema.items;
+                        if (itemSchema.type === 'object' || itemSchema.type === 'array') {
+                            console.warn("Cannot use tokenfield for arrays of arrays or objects");
+                        } else {
+                            var f = schemaFormProvider.stdFormObj(name, schema, options);
+                            f.key = options.path;
+                            f.type = 'tokenfield';
+
+                            // There should be a better way to do this, but I don't know it.
+                            f.validationMessage = {
+                                // Numeric Errors
+                                100: 'Value is not a multiple of {{schema.items.multipleOf}}',
+                                101: '{{value}} contains an item that is less than the minimum of {{schema.items.minimum}}',
+                                102: '{{value}} contains an item that is equal to the exclusive minimum {{schema.items.minimum}}',
+                                103: '{{value}} contains an item that is greater than the allowed maximum of {{schema.items.maximum}}',
+                                104: '{{value}} contains an item that is equal to the exclusive maximum {{schema.items.maximum}}',
+                                105: '{{value}} contains an item that is not a valid number',
+                                // String errors
+                                200: '{{value}} contains a string that is too short, minimum {{schema.items.minLength}}',
+                                201: '{{value}} contains a string that is too long ({{value.length}} chars), maximum {{schema.items.maxLength}}',
+                                202: '{{value}} contains a string that does not match pattern: {{schema.items.pattern}}'
+                            };
+
+                            options.lookup[sfPathProvider.stringify(options.path)] = f;
+                            return f;
+                        }
                     }
                 };
 
                 schemaFormProvider.defaults.array.unshift(tokenfield);
 
                 //Add to the bootstrap directive
-                schemaFormDecoratorsProvider.addMapping(
+                schemaFormDecoratorsProvider.defineAddOn(
                     'bootstrapDecorator',
                     'tokenfield',
-                    'directives/decorators/bootstrap/tokenfield/angular-schema-form-tokenfield.html'
-                );
-
-                schemaFormDecoratorsProvider.createDirective(
-                    'tokenfield',
-                    'directives/decorators/bootstrap/tokenfield/angular-schema-form-tokenfield.html'
+                    'directives/decorators/bootstrap/tokenfield/angular-schema-form-tokenfield.html',
+                    sfBuilderProvider.stdBuilders
                 );
             }
-        ]);
+    ]);
 
-    angular.module('schemaForm').directive('angularBootstrapTokenfield', function () {
+    angular.module('schemaForm').controller('angularBootstrapTokenfieldController',
+        ['$scope', function($scope) {
+
+        // Our view binds schemaForm to modelValue
+        // while the tokenfield is bound to viewValue
+        $scope.tokenfield = {
+            viewValue: "",
+            modelValue: []
+        };
+
+        $scope.parseValue = function(value) {
+            var conversiontype = $scope.form.schema.items.type;
+            if (conversiontype === 'number' || conversiontype === 'integer') {
+                return Number(value);
+            } else if (conversiontype === 'boolean') {
+                return Boolean(value);
+            } else {
+                // We're going to assume it is a string here
+                // We exclude objects and arrays
+                return value;
+            }
+        };
+
+        $scope.$watch(function() {
+            return $scope.tokenfield.viewValue;
+        }, function(newValue, oldValue){
+            console.log("Tokenfield value changed from: " + oldValue + "  to: " + newValue);
+            if (typeof(newValue) === 'string'){
+                if (newValue.indexOf(",") >= 0) {
+                    $scope.tokenfield.modelValue = newValue.split(",").map(function(value) {
+                        return $scope.parseValue(value);
+                    });
+                } else if (newValue.length > 0) {
+                    $scope.tokenfield.modelValue = [];
+                    $scope.tokenfield.modelValue.push($scope.parseValue(newValue));
+                } else {
+                    $scope.tokenfield.modelValue = [];
+                }
+            } else {
+                $scope.tokenfield.modelValue = newValue;
+            }
+        });
+    }]);
+
+    angular.module('schemaForm').directive('angularBootstrapTokenfield',
+        function () {
         return {
             restrict: 'A',
-            require: '^ngModel',
             scope: {
                 'tokens': '=',
                 'limit': '=',
@@ -47,8 +106,9 @@ angular.module('schemaForm').run(['$templateCache', function($templateCache) {$t
                 'delimiter': '=',
                 'beautify': '=',
                 'inputType': '=',
+                'schemaFormModel': '='
             },
-            link: function (scope, element, attrs) {
+            link: function (scope, element, attrs, ctrl) {
                 // The placeholder is not correctly propagated
                 // So here is some ugly code to extract the original one
                 // and put it in place when the dom changes are done.
@@ -63,37 +123,6 @@ angular.module('schemaForm').run(['$templateCache', function($templateCache) {$t
                     function () {
                         scope.tokenInput.placeholder = scope.original.placeholder;
                     });
-
-                // Add custom validation
-                var schema = scope.$parent.form.schema;
-                // tokenfield uses jquery events
-                $(newElement)
-                    .on('tokenfield:createdtoken', function (e) {
-                        console.log('New token created!');
-                        var value = e.attrs.value;
-                        if (schema.items.type === 'number' || schema.items.type === 'integer') {
-                            if ($.isNumeric(value)) {
-                                value = Number(value);
-                            } else {
-                                value = "";
-                            }
-                        }
-                        
-                        var valid = tv4.validate(value, schema.items);
-                        if (!valid){
-                            scope.$broadcast('schemaForm.error.'+this.name,'tv4-0',tv4.error.message);
-                            scope.$broadcast('schemaForm.error.'+this.name,'tv4-0',true);
-                            $(e.relatedTarget).addClass('invalid');
-                        }
-                    });
-                    /*
-                    .on('tokenfield:edittoken', function (e) {
-                        console.log('Token was edited, new value: ' + e.attrs.value)
-                    })
-                    .on('tokenfield:removedtoken', function (e) {
-                        alert('Token removed! Token value was: ' + e.attrs.value)
-                    });
-                    */
             }
         };
     });
