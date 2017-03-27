@@ -48,16 +48,12 @@
 
     angular.module('schemaForm').controller('angularBootstrapTokenfieldController',
         ['$scope', function($scope) {
+        $scope.tokenfield = [];
+    }]);
 
-        // Our view binds schemaForm to modelValue
-        // while the tokenfield is bound to viewValue
-        $scope.tokenfield = {
-            viewValue: "",
-            modelValue: []
-        };
-
-        $scope.parseValue = function(value) {
-            var conversiontype = $scope.form.schema.items.type;
+    angular.module('schemaForm').directive('angularBootstrapTokenfield', function () {
+        var parseValue = function($scope, value) {
+            var conversiontype = $scope.$parent.form.schema.items.type;
             if (conversiontype === 'number' || conversiontype === 'integer') {
                 return Number(value);
             } else if (conversiontype === 'boolean') {
@@ -69,31 +65,9 @@
             }
         };
 
-        $scope.$watch(function() {
-            return $scope.tokenfield.viewValue;
-        }, function(newValue, oldValue){
-            console.log("Tokenfield value changed from: " + oldValue + "  to: " + newValue);
-            if (typeof(newValue) === 'string'){
-                if (newValue.indexOf(",") >= 0) {
-                    $scope.tokenfield.modelValue = newValue.split(",").map(function(value) {
-                        return $scope.parseValue(value);
-                    });
-                } else if (newValue.length > 0) {
-                    $scope.tokenfield.modelValue = [];
-                    $scope.tokenfield.modelValue.push($scope.parseValue(newValue));
-                } else {
-                    $scope.tokenfield.modelValue = [];
-                }
-            } else {
-                $scope.tokenfield.modelValue = newValue;
-            }
-        });
-    }]);
-
-    angular.module('schemaForm').directive('angularBootstrapTokenfield',
-        function () {
         return {
             restrict: 'A',
+            require: "ngModel",
             scope: {
                 'tokens': '=',
                 'limit': '=',
@@ -107,7 +81,7 @@
                 'inputType': '=',
                 'schemaFormModel': '='
             },
-            link: function (scope, element, attrs, ctrl) {
+            link: function (scope, element, attrs, model, ctrl) {
                 // The placeholder is not correctly propagated
                 // So here is some ugly code to extract the original one
                 // and put it in place when the dom changes are done.
@@ -121,7 +95,50 @@
                     },
                     function () {
                         scope.tokenInput.placeholder = scope.original.placeholder;
-                    });
+                    }
+                );
+
+                scope.$watch(
+                    function() {
+                        return scope.$parent.tokenfield;
+                    },
+                    function(newValue, oldValue) {
+                        // This function is mainly to set the initial
+                        // values of the array.
+                        if (newValue !== model.$modelValue) {
+                            model.$modelValue = newValue;
+                            element.tokenfield('setTokens', newValue.join());
+                        }
+                    }
+                );
+                
+                model.$parsers.push(function(newValue){
+                    var modelValue = [];
+                    if (typeof(newValue) === 'string') {
+                        if (newValue.indexOf(",") >= 0) {
+                            modelValue = newValue.split(",").map(function(value) {
+                                return parseValue(scope, value);
+                            });
+                        } else if (newValue.length > 0) {
+                            modelValue.push(parseValue(scope, newValue));
+                        }
+                    } else {
+                        modelValue = newValue;
+                    }
+                    // also update the parent
+                    scope.$parent.tokenfield = modelValue;
+                    return modelValue;
+                });
+
+                model.$formatters.push(function(value){
+                    if (value) {
+                        if (value.constructor === Array) {
+                            return value.join();
+                        } else {
+                            return value;
+                        }
+                    }
+                });
             }
         };
     });

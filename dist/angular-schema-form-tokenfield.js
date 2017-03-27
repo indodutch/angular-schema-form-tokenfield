@@ -1,4 +1,4 @@
-angular.module('schemaForm').run(['$templateCache', function($templateCache) {$templateCache.put('directives/decorators/bootstrap/tokenfield/angular-schema-form-tokenfield.html','<div class="form-group schema-form-{{form.type}} {{form.htmlClass}}" sf-field-model="sf-new-array" sf-new-array="tokenfield.modelValue" schema-validate="form" data-ng-controller="angularBootstrapTokenfieldController" data-ng-class="{\'has-error\': form.disableErrorState !== true && hasError(), \'has-success\': form.disableSuccessState !== true && hasSuccess(), \'has-feedback\': form.feedback !== false }" data-ng-model="tokenfield.modelValue">\n  <label class="control-label {{form.labelHtmlClass}}" data-ng-class="{\'sr-only\': !showTitle()}">{{form.title}}</label>\n    <input tokens="form.tokens" limit="form.limit" min-length="form.minLength" min-width="form.minWidth" show-autocomplete-on-focus="form.showAutocompleteOnFocus" autocomplete="form.autocomplete" create-tokens-on-blur="form.createTokensOnBlur" delimiter="form.delimiter" beautify="form.beautify" input-type="form.schema.items.type" type="form.schema.items.type" angular-bootstrap-tokenfield="" data-ng-model="tokenfield.viewValue">\n\n    <div class="help-block" sf-message="form.description"></div>\n\n</div>');}]);
+angular.module('schemaForm').run(['$templateCache', function($templateCache) {$templateCache.put('directives/decorators/bootstrap/tokenfield/angular-schema-form-tokenfield.html','<div class="form-group schema-form-{{form.type}} {{form.htmlClass}}" sf-field-model="sf-new-array" sf-new-array="tokenfield" schema-validate="form" data-ng-controller="angularBootstrapTokenfieldController" data-ng-class="{\'has-error\': form.disableErrorState !== true && hasError(), \'has-success\': form.disableSuccessState !== true && hasSuccess(), \'has-feedback\': form.feedback !== false }" data-ng-model="tokenfield">\n  <label class="control-label {{form.labelHtmlClass}}" data-ng-class="{\'sr-only\': !showTitle()}">{{form.title}}</label>\n    <input sf-field-model="replaceAll" tokens="form.tokens" limit="form.limit" min-length="form.minLength" min-width="form.minWidth" show-autocomplete-on-focus="form.showAutocompleteOnFocus" autocomplete="form.autocomplete" create-tokens-on-blur="form.createTokensOnBlur" delimiter="form.delimiter" beautify="form.beautify" input-type="form.schema.items.type" type="form.schema.items.type" angular-bootstrap-tokenfield="" data-ng-model="$$value$$">\n\n    <div class="help-block" sf-message="form.description"></div>\n\n</div>');}]);
 (function () {
     'use strict';
     angular.module('schemaForm').config(
@@ -49,16 +49,12 @@ angular.module('schemaForm').run(['$templateCache', function($templateCache) {$t
 
     angular.module('schemaForm').controller('angularBootstrapTokenfieldController',
         ['$scope', function($scope) {
+        $scope.tokenfield = [];
+    }]);
 
-        // Our view binds schemaForm to modelValue
-        // while the tokenfield is bound to viewValue
-        $scope.tokenfield = {
-            viewValue: "",
-            modelValue: []
-        };
-
-        $scope.parseValue = function(value) {
-            var conversiontype = $scope.form.schema.items.type;
+    angular.module('schemaForm').directive('angularBootstrapTokenfield', function () {
+        var parseValue = function($scope, value) {
+            var conversiontype = $scope.$parent.form.schema.items.type;
             if (conversiontype === 'number' || conversiontype === 'integer') {
                 return Number(value);
             } else if (conversiontype === 'boolean') {
@@ -70,31 +66,9 @@ angular.module('schemaForm').run(['$templateCache', function($templateCache) {$t
             }
         };
 
-        $scope.$watch(function() {
-            return $scope.tokenfield.viewValue;
-        }, function(newValue, oldValue){
-            console.log("Tokenfield value changed from: " + oldValue + "  to: " + newValue);
-            if (typeof(newValue) === 'string'){
-                if (newValue.indexOf(",") >= 0) {
-                    $scope.tokenfield.modelValue = newValue.split(",").map(function(value) {
-                        return $scope.parseValue(value);
-                    });
-                } else if (newValue.length > 0) {
-                    $scope.tokenfield.modelValue = [];
-                    $scope.tokenfield.modelValue.push($scope.parseValue(newValue));
-                } else {
-                    $scope.tokenfield.modelValue = [];
-                }
-            } else {
-                $scope.tokenfield.modelValue = newValue;
-            }
-        });
-    }]);
-
-    angular.module('schemaForm').directive('angularBootstrapTokenfield',
-        function () {
         return {
             restrict: 'A',
+            require: "ngModel",
             scope: {
                 'tokens': '=',
                 'limit': '=',
@@ -108,7 +82,7 @@ angular.module('schemaForm').run(['$templateCache', function($templateCache) {$t
                 'inputType': '=',
                 'schemaFormModel': '='
             },
-            link: function (scope, element, attrs, ctrl) {
+            link: function (scope, element, attrs, model, ctrl) {
                 // The placeholder is not correctly propagated
                 // So here is some ugly code to extract the original one
                 // and put it in place when the dom changes are done.
@@ -122,7 +96,47 @@ angular.module('schemaForm').run(['$templateCache', function($templateCache) {$t
                     },
                     function () {
                         scope.tokenInput.placeholder = scope.original.placeholder;
-                    });
+                    }
+                );
+
+                scope.$watch(
+                    function() {
+                        return scope.$parent.tokenfield;
+                    },
+                    function(newValue, oldValue) {
+                        if (newValue !== model.$modelValue) {
+                            model.$modelValue = newValue;
+                            element.tokenfield('setTokens', newValue.join());
+                        }
+                    }
+                );
+                
+                model.$parsers.push(function(newValue){
+                    var modelValue = [];
+                    if (typeof(newValue) === 'string') {
+                        if (newValue.indexOf(",") >= 0) {
+                            modelValue = newValue.split(",").map(function(value) {
+                                return parseValue(scope, value);
+                            });
+                        } else if (newValue.length > 0) {
+                            modelValue.push(parseValue(scope, newValue));
+                        }
+                    } else {
+                        modelValue = newValue;
+                    }
+                    scope.$parent.tokenfield = modelValue;
+                    return modelValue;
+                });
+
+                model.$formatters.push(function(value){
+                    if (value) {
+                        if (value.constructor === Array) {
+                            return value.join();
+                        } else {
+                            return value;
+                        }
+                    }
+                });
             }
         };
     });

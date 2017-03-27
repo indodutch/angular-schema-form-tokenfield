@@ -2,13 +2,14 @@
      class="form-group schema-form-{{form.type}} {{form.htmlClass}}"
      ng-class="{'has-error': form.disableErrorState !== true && hasError(), 'has-success': form.disableSuccessState !== true && hasSuccess(), 'has-feedback': form.feedback !== false }"
      sf-field-model="sf-new-array"
-     sf-new-array="tokenfield.modelValue"
+     sf-new-array="tokenfield"
      schema-validate="form"
-     ng-model="tokenfield.modelValue"
+     ng-model="tokenfield"
 >
   <label class="control-label {{form.labelHtmlClass}}" ng-class="{'sr-only': !showTitle()}">{{form.title}}</label>
     <input 
-         ng-model="tokenfield.viewValue"
+         sf-field-model="replaceAll" 
+         ng-model="$$value$$"
          tokens="form.tokens"
          limit="form.limit"
          min-length="form.minLength"
